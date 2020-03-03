@@ -115,8 +115,8 @@ static void generateReport(DBCollection collection,BasicDBObject whereQuery,Stri
 	    fields.put("eventId",1);
 	    fields.put("eventDate",1);
 	    fields.put("eventDetails",1);
-	    fields.put("transactionId",1);
-		DBCursor cursor = collection.find(whereQuery,fields).sort(new BasicDBObject("created_atm",-1));
+	    fields.put("transactionsId",1);
+		DBCursor cursor = collection.find(whereQuery,fields).sort(new BasicDBObject("created_at",-1));
 		TreeMap<Double, String> sortedeventDetails = new TreeMap<Double, String>();
 	    while (cursor.hasNext()) {
 	    	DBObject tobj = cursor.next();
