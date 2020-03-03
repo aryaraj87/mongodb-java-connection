@@ -11,7 +11,6 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -48,21 +47,21 @@ public class DBConnection {
 	static OutputStream fos1 = null;
 	static Workbook workbk = null;
 	
-	
 	public static void main(String[] args) {
 		 
 		 try {
 		 
+		  String[] incidentIds = {"INT_QIDS","INT_PROS_INTERNAL","INT_MDM_OA","INT_ECLIPSE_EDMS"};
 		  Mongo mongo = new Mongo("batch-corona.austin.hpicorp.net", 37017);
 		  DB db = mongo.getDB("coronaqids");
 		  boolean auth = db.authenticate("coronatest", "test".toCharArray());
 		  if(auth){
 			  DBCollection collection = db.getCollection("quotes");
-				/*
-				 * qidsQuery(collection); optimusQuery(collection);
-				 */
-			  mdmQuery(collection);
-			  //edmsQuery(collection);
+			  for (String incidentId : incidentIds) {
+				  System.out.println("**** "+incidentId+" - Begins ****");
+				  query(collection,incidentId);
+				  System.out.println("**** "+incidentId+" - Ends ****");
+			  }
 			  generateFinalReport(finalReport);
 		  }else{
 		   System.out.println("No DB Connection");
@@ -79,40 +78,13 @@ public class DBConnection {
 		 
 		 }
 	
-static void qidsQuery(DBCollection collection) throws ParseException {
-	System.out.println("**** QIDS - Begins ****");
+static void query(DBCollection collection,String incidentId) throws ParseException {
+	
 	BasicDBObject whereQuery = new BasicDBObject();
-	whereQuery.put("eventId", "INT_QIDS"); 
-	whereQuery.put("created_at", new BasicDBObject("$gte",format.parse("2020-02-24T15:58:00Z")));
-	generateReport(collection,whereQuery,"QIDS");
-	System.out.println("**** QIDS - Ends ****");
-}
-static void optimusQuery(DBCollection collection) throws ParseException {
-	System.out.println("**** OPTIMUS - Begins ****");
-	BasicDBObject whereQuery = new BasicDBObject();
-	whereQuery.put("eventId", "INT_PROS_INTERNAL"); 
-	whereQuery.put("created_at", new BasicDBObject("$gte",format.parse("2020-02-24T05:30:00Z")));
-	generateReport(collection,whereQuery,"OPTIMUS");
-	System.out.println("**** OPTIMUS - Ends ****");
-}
-static void mdmQuery(DBCollection collection) throws ParseException {
-	System.out.println("**** MDM - Begins ****");
-	BasicDBObject whereQuery = new BasicDBObject();
-	BasicDBObject timeStamp = new BasicDBObject();
-	timeStamp.put("$gte",format.parse("2020-02-19T15:19:00Z"));
-	timeStamp.put("$lt",format.parse("2020-02-24T00:01:59Z"));
-	whereQuery.put("eventId", "INT_MDM_OA"); 
-	whereQuery.put("created_at", timeStamp);
-	generateReport(collection,whereQuery,"MDM");
-	System.out.println("**** MDM - Ends ****");
-}
-static void edmsQuery(DBCollection collection) throws ParseException {
-	System.out.println("**** EDMS - Begins ****");
-	BasicDBObject whereQuery = new BasicDBObject();
-	whereQuery.put("eventId", "INT_ECLIPSE_EDMS"); 
-	whereQuery.put("created_at", new BasicDBObject("$gte",format.parse("2020-02-23T00:01:59Z")));
-	generateReport(collection,whereQuery,"EDMS");
-	System.out.println("**** EDMS - Ends ****");
+	whereQuery.put("eventId", incidentId); 
+	whereQuery.put("created_at", new BasicDBObject("$gte",format.parse("2020-03-02T15:19:00Z")));
+	generateReport(collection,whereQuery,incidentId);
+	
 }
 static void generateReport(DBCollection collection,BasicDBObject whereQuery,String applicationName) {
 	File file = null;
